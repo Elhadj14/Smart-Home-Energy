@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Renewable Energy Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #00d98e;
+            --dark-bg: #0a0e27;
+            --card-bg: #141829;
+            --border-color: #1e2749;
+            --text-primary: #ffffff;
+            --text-secondary: #a8b2d1;
+            --accent-blue: #0066ff;
+            --accent-orange: #ff6b35;
+            --success: #00d98e;
+            --warning: #ffa500;
+            --danger: #ff4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f1535 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark-bg);
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav button.active {
+            color: var(--primary-green);
+        }
+
+        nav button:hover {
+            background: rgba(0, 217, 142, 0.1);
+            color: var(--primary-green);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(0, 217, 142, 0.1);
+            border: 1px solid var(--primary-green);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--primary-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 217, 142, 0.7); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 217, 142, 0); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .control-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .control-card:nth-child(1) { animation-delay: 0.1s; }
+        .control-card:nth-child(2) { animation-delay: 0.2s; }
+        .control-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .control-card:hover {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 20px rgba(0, 217, 142, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: numberChange 0.5s ease;
+        }
+
+        @keyframes numberChange {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .control-unit {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(30, 39, 73, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-blue));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 217, 142, 0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .tab-content {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .charts-section {
+            margin-top: 3rem;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 20px rgba(0, 217, 142, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 0.8rem 2rem;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            color: var(--dark-bg);
+            border-color: var(--primary-green);
+        }
+
+        .mode-btn:hover:not(.active) {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .device-card {
+            background: rgba(0, 217, 142, 0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-green);
+            box-shadow: 0 5px 20px rgba(0, 217, 142, 0.2);
+        }
+
+        .device-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .device-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .device-info-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .device-info-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .device-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .status-on {
+            background: rgba(0, 217, 142, 0.1);
+            color: var(--primary-green);
+        }
+
+        .status-off {
+            background: rgba(255, 165, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .device-toggle {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .device-toggle.on {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+        }
+
+        .device-toggle.off {
+            background: var(--danger);
+        }
+
+        .device-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .device-note {
+            background: rgba(0, 102, 255, 0.1);
+            border-left: 3px solid var(--accent-blue);
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+
+        .suggestions {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .suggestions-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+
+        .suggestion-item {
+            padding: 1rem;
+            background: rgba(0, 217, 142, 0.05);
+            border-left: 3px solid var(--primary-green);
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 217, 142, 0.1);
+            transform: translateX(5px);
+        }
+
+        .device-sections {
+            margin-top: 2rem;
+        }
+
+        .device-section-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .device-section-btn {
+            padding: 0.6rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .device-section-btn.active {
+            background: linear-gradient(135deg, var(--primary-green), var(--accent-blue));
+            color: var(--dark-bg);
+            border-color: var(--primary-green);
+        }
+
+        .device-section {
+            display: none;
+        }
+
+        .device-section.active {
+            display: block;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 217, 142, 0.05);
+            border-radius: 8px;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .devices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                Smart Energy
+            </div>
+            <nav>
+                <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="nav-btn" data-tab="control">Control</button>
+                <button class="nav-btn" data-tab="devices">Devices</button>
+                <button class="nav-btn" data-tab="analytics">Analytics</button>
+            </nav>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                System Online
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Renewable Energy Dashboard</h1>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content">
+            <div class="control-panel">
+                <div class="control-card">
+                    <div class="control-label">☀️ Solar Production</div>
+                    <div>
+                        <span id="solar-production" class="control-value">4.8</span>
+                        <span class="control-unit">kW</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="solar-progress" class="progress-fill" style="width: 80%"></div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Peak</div>
+                            <div class="stat-value">5.2 kW</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Today</div>
+                            <div class="stat-value">38 kWh</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-label">🔋 Battery Level</div>
+                    <div>
+                        <span id="battery-level" class="control-value">65</span>
+                        <span class="control-unit">%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="battery-progress" class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Capacity</div>
+                            <div class="stat-value">10 kWh</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Status</div>
+                            <div id="battery-status" class="stat-value">Charging</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <div class="control-label">⚡ Total Load</div>
+                    <div>
+                        <span id="total-load" class="control-value">3.2</span>
+                        <span class="control-unit">kW</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="load-progress" class="progress-fill" style="width: 51%"></div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Grid</div>
+                            <div id="stat-grid" class="stat-value">OFF</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Time</div>
+                            <div id="stat-time" class="stat-value">--:--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">📊 Production vs Load (24h)</div>
+                        <div class="chart-container">
+                            <canvas id="productionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">🔋 Battery Trend (24h)</div>
+                        <div class="chart-container">
+                            <canvas id="batteryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">🔌 Energy Sources</div>
+                        <div class="chart-container">
+                            <canvas id="sourcesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">📈 Weekly Efficiency</div>
+                        <div class="chart-container">
+                            <canvas id="efficiencyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">📅 Weekly Energy Overview</div>
+                    <div class="chart-container">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Tab -->
+        <div id="control-tab" class="tab-content hidden">
+            <div class="summary-card">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Active Devices</div>
+                        <div id="summary-active-devices" class="summary-value">4</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Consumption</div>
+                        <div id="summary-consumption" class="summary-value">3.2</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.3rem;">kW</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Daily Estimate</div>
+                        <div id="summary-daily" class="summary-value">25.6</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.3rem;">kWh</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Efficiency</div>
+                        <div id="summary-efficiency" class="summary-value">92%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('auto')">🤖 Auto Mode</button>
+                <button class="mode-btn" onclick="switchMode('manual')">🎮 Manual Mode</button>
+            </div>
+
+            <div id="auto-mode" style="display: block;">
+                <div id="auto-devices" class="devices-grid"></div>
+            </div>
+
+            <div id="manual-mode" style="display: none;">
+                <div id="suggestions-container" class="suggestions"></div>
+                <div id="manual-devices" class="devices-grid"></div>
+            </div>
+        </div>
+
+        <!-- Devices Tab -->
+        <div id="devices-tab" class="tab-content hidden">
+            <div class="device-sections">
+                <div class="device-section-selector">
+                    <button class="device-section-btn active" onclick="switchDeviceSection('system')">⚙️ System Components</button>
+                    <button class="device-section-btn" onclick="switchDeviceSection('household')">🏠 Household Devices</button>
+                </div>
+
+                <div id="system-section" class="device-section active">
+                    <div id="system-devices" class="devices-grid"></div>
+                </div>
+
+                <div id="household-section" class="device-section">
+                    <div id="household-devices" class="devices-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content hidden">
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <div class="chart-title">📊 Hourly Production</div>
+                    <div class="chart-container">
+                        <canvas id="hourlyProductionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">💰 Cost Savings</div>
+                    <div class="chart-container">
+                        <canvas id="savingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <h3 style="margin-bottom: 1rem; color: var(--primary-green);">📈 Performance Metrics</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">Monthly Production</div>
+                        <div class="summary-value">245</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.3rem;">kWh</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Monthly Savings</div>
+                        <div class="summary-value">$87</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">CO₂ Reduced</div>
+                        <div class="summary-value">183</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.3rem;">kg</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">System Efficiency</div>
+                        <div class="summary-value">91%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let solarPower = 4800;
+        let batterySOC = 65;
+        let gridPowerActive = false;
+        let waterHeaterActive = false;
+        let charts = {};
+
+        const devices = [
+            { name: 'Refrigerator', icon: '🧊', load: 800, alwaysOn: true, status: true },
+            { name: 'Internet', icon: '📡', load: 150, alwaysOn: true, status: true },
+            { name: 'Router', icon: '📶', load: 50, alwaysOn: true, status: true },
+            { name: 'Security', icon: '🔒', load: 100, alwaysOn: true, status: true },
+            { name: 'Lights', icon: '💡', load: 300, alwaysOn: false, status: false },
+            { name: 'AC', icon: '❄️', load: 2000, alwaysOn: false, status: false },
+            { name: 'TV', icon: '📺', load: 200, alwaysOn: false, status: false },
+            { name: 'Washing Machine', icon: '🧺', load: 1200, alwaysOn: false, status: false }
+        ];
+
+        const systemDevices = [
+            { name: 'Solar Panels', icon: '☀️', info: '6 kW System, 12 Panels' },
+            { name: 'Battery', icon: '🔋', info: '10 kWh Capacity' },
+            { name: 'Inverter', icon: '⚡', info: '5 kW Hybrid' },
+            { name: 'Grid', icon: '🔌', info: 'Backup Connection' }
+        ];
+
+        let deviceStates = devices.map(d => d.status);
+
+        function isMorning() {
+            const h = new Date().getHours();
+            return h >= 6 && h < 18;
+        }
+
+        function calculateTotalLoad() {
+            return devices.reduce((sum, d, i) => sum + (deviceStates[i] ? d.load : 0), 0);
+        }
+
+        function executeControlLogic() {
+            deviceStates = devices.map(d => d.alwaysOn || !isMorning());
+            const totalLoad = calculateTotalLoad();
+
+            if (solarPower > totalLoad) {
+                batterySOC = Math.min(100, batterySOC + (solarPower - totalLoad) * 0.002);
+                if (batterySOC >= 95) {
+                    waterHeaterActive = true;
+                }
+                gridPowerActive = false;
+            } else {
+                if (batterySOC > 30) {
+                    batterySOC = Math.max(0, batterySOC - (totalLoad - solarPower) * 0.005);
+                } else {
+                    gridPowerActive = true;
+                }
+                waterHeaterActive = false;
+            }
+            updateUI();
+        }
+
+        function renderAutoMode() {
+            executeControlLogic();
+            document.getElementById('auto-devices').innerHTML = devices.map((d, i) => `
+                <div class="device-card">
+                    <div class="device-icon">${d.icon}</div>
+                    <div class="device-name">${d.name}</div>
+                    <div class="device-info">
+                        <span class="device-info-label">Status:</span>
+                        <span class="device-status ${deviceStates[i] ? 'status-on' : 'status-off'}">${deviceStates[i] ? '🟢 ON' : '🔴 OFF'}</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Current Draw:</span>
+                        <span class="device-info-value">${deviceStates[i] ? (d.load / 1000).toFixed(2) : '0.00'} kW</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Capacity:</span>
+                        <span class="device-info-value">${(d.load / 1000).toFixed(2)} kW</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Daily Est:</span>
+                        <span class="device-info-value">${(d.load * 8 / 1000).toFixed(1)} kWh</span>
+                    </div>
+                    <div class="device-note">
+                        ${d.alwaysOn ? '⚙️ Always-On Device (Essential)' : (isMorning() ? '☀️ Auto OFF (Daytime Mode)' : '🌙 Auto ON (Night Mode)')}
+                    </div>
+                </div>
+            `).join('');
+            updateControlSummary();
+        }
+
+        function renderManualMode() {
+            generateSuggestions();
+            document.getElementById('manual-devices').innerHTML = devices.map((d, i) => `
+                <div class="device-card">
+                    <div class="device-icon">${d.icon}</div>
+                    <div class="device-name">${d.name}</div>
+                    <div class="device-info">
+                        <span class="device-info-label">Current:</span>
+                        <span class="device-info-value">${deviceStates[i] ? (d.load / 1000).toFixed(2) : '0.00'} kW</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Capacity:</span>
+                        <span class="device-info-value">${(d.load / 1000).toFixed(2)} kW</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Daily Est:</span>
+                        <span class="device-info-value">${(d.load * 8 / 1000).toFixed(1)} kWh</span>
+                    </div>
+                    <button onclick="toggleDevice(${i})" class="device-toggle ${deviceStates[i] ? 'on' : 'off'}">
+                        ${deviceStates[i] ? '✓ ON' : '✗ OFF'}
+                    </button>
+                </div>
+            `).join('');
+            updateControlSummary();
+        }
+
+        function generateSuggestions() {
+            let s = [];
+            const totalLoad = calculateTotalLoad();
+            const solarKW = (solarPower / 1000).toFixed(1);
+            const loadKW = (totalLoad / 1000).toFixed(1);
+
+            if (solarPower > totalLoad) {
+                s.push('✅ <strong>Excellent Conditions</strong>: Solar production (' + solarKW + ' kW) exceeds load (' + loadKW + ' kW). Battery is charging.');
+            } else if (batterySOC > 50) {
+                s.push('🔋 <strong>Battery Healthy</strong>: ' + Math.round(batterySOC) + '% charge. Safe to operate high-power devices.');
+            } else if (batterySOC > 30) {
+                s.push('⚠️ <strong>Battery Low</strong>: ' + Math.round(batterySOC) + '% charge. Consider disabling non-essential devices.');
+            } else {
+                s.push('🚨 <strong>Critical Level</strong>: ' + Math.round(batterySOC) + '% charge. Grid power active!');
+            }
+
+            if (waterHeaterActive) {
+                s.push('💧 <strong>Water Heater Active</strong>: Battery full, using excess solar energy.');
+            }
+            if (gridPowerActive) {
+                s.push('⚡ <strong>Grid Power Active</strong>: Battery below 30%, supplementing from grid.');
+            }
+
+            const savings = ((solarPower / 1000) * 0.12 * 8).toFixed(2);
+            s.push('💰 <strong>Today\'s Savings</strong>: Estimated $' + savings + ' saved on electricity costs.');
+
+            document.getElementById('suggestions-container').innerHTML = 
+                '<div class="suggestions-title">💡 Smart Suggestions</div>' + 
+                s.map(x => '<div class="suggestion-item">' + x + '</div>').join('');
+        }
+
+        function switchMode(m) {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('auto-mode').style.display = m === 'auto' ? 'block' : 'none';
+            document.getElementById('manual-mode').style.display = m === 'manual' ? 'block' : 'none';
+            if (m === 'auto') renderAutoMode(); 
+            else renderManualMode();
+        }
+
+        function switchDeviceSection(s) {
+            document.querySelectorAll('.device-section-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.device-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(s + '-section').classList.add('active');
+            if (s === 'system') renderSystemDevices(); 
+            else renderHouseholdDevices();
+        }
+
+        function renderSystemDevices() {
+            document.getElementById('system-devices').innerHTML = systemDevices.map(d => `
+                <div class="device-card">
+                    <div class="device-icon">${d.icon}</div>
+                    <div class="device-name">${d.name}</div>
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(0, 217, 142, 0.1); border-radius: 8px;">
+                        <div style="font-size: 0.95rem; color: var(--text-primary);">${d.info}</div>
+                    </div>
+                    <div class="device-status status-on" style="margin-top: 1rem;">🟢 Operational</div>
+                </div>
+            `).join('');
+        }
+
+        function renderHouseholdDevices() {
+            document.getElementById('household-devices').innerHTML = devices.map((d, i) => `
+                <div class="device-card">
+                    <div class="device-icon">${d.icon}</div>
+                    <div class="device-name">${d.name}</div>
+                    <div class="device-info">
+                        <span class="device-info-label">Status:</span>
+                        <span class="device-status ${deviceStates[i] ? 'status-on' : 'status-off'}">${deviceStates[i] ? '🟢 ON' : '🔴 OFF'}</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Power:</span>
+                        <span class="device-info-value">${(d.load / 1000).toFixed(2)} kW</span>
+                    </div>
+                    <div class="device-info">
+                        <span class="device-info-label">Type:</span>
+                        <span class="device-info-value">${d.alwaysOn ? 'Essential' : 'Optional'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleDevice(i) {
+            deviceStates[i] = !deviceStates[i];
+            renderManualMode();
+        }
+
+        function updateUI() {
+            const load = calculateTotalLoad();
+            const now = new Date();
+            
+            // Update dashboard values with kW
+            const solarKW = (solarPower / 1000).toFixed(1);
+            const loadKW = (load / 1000).toFixed(1);
+            
+            document.getElementById('solar-production').textContent = solarKW;
+            document.getElementById('solar-progress').style.width = (solarPower / 6000 * 100) + '%';
+            
+            document.getElementById('battery-level').textContent = Math.round(batterySOC);
+            document.getElementById('battery-progress').style.width = batterySOC + '%';
+            document.getElementById('battery-status').textContent = solarPower > load ? 'Charging' : (batterySOC > 30 ? 'Discharging' : 'Grid Power');
+            
+            document.getElementById('total-load').textContent = loadKW;
+            document.getElementById('load-progress').style.width = (load / 6200 * 100) + '%';
+            
+            document.getElementById('stat-grid').textContent = gridPowerActive ? 'ON' : 'OFF';
+            document.getElementById('stat-time').textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+            
+            // Update charts if they exist
+            if (charts.production) {
+                updateProductionChart();
+            }
+        }
+
+        function updateControlSummary() {
+            const activeDevices = deviceStates.filter(s => s).length;
+            const totalLoad = calculateTotalLoad();
+            const totalKW = (totalLoad / 1000).toFixed(1);
+            const dailyKWh = (totalLoad * 8 / 1000).toFixed(1);
+            const efficiency = batterySOC > 60 ? 92 : 85;
+            
+            document.getElementById('summary-active-devices').textContent = activeDevices;
+            document.getElementById('summary-consumption').textContent = totalKW;
+            document.getElementById('summary-daily').textContent = dailyKWh;
+            document.getElementById('summary-efficiency').textContent = efficiency + '%';
+        }
+
+        function updateProductionChart() {
+            const hour = new Date().getHours();
+            const currentSolar = (solarPower / 1000).toFixed(1);
+            const currentLoad = (calculateTotalLoad() / 1000).toFixed(1);
+            
+            // Update the chart data dynamically
+            if (charts.production && charts.production.data) {
+                charts.production.data.datasets[0].data[hour] = parseFloat(currentSolar);
+                charts.production.data.datasets[1].data[hour] = parseFloat(currentLoad);
+                charts.production.update('none');
+            }
+        }
+
+        function initCharts() {
+            const colors = { primary: '#00d98e', secondary: '#0066ff', accent: '#ff6b35' };
+            const chartOpts = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { 
+                            color: '#a8b2d1',
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#a8b2d1' },
+                        grid: { color: 'rgba(30, 39, 73, 0.5)' }
+                    },
+                    x: {
+                        ticks: { color: '#a8b2d1' },
+                        grid: { color: 'rgba(30, 39, 73, 0.5)' }
+                    }
+                }
+            };
+
+            // Production Chart with kW units
+            charts.production = new Chart(document.getElementById('productionChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [
+                        {
+                            label: 'Solar Production (kW)',
+                            data: [0, 0.3, 3.5, 5.2, 4.1, 1.2, 0],
+                            borderColor: colors.primary,
+                            backgroundColor: 'rgba(0, 217, 142, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Energy Demand (kW)',
+                            data: [2.1, 2.0, 2.5, 3.2, 3.8, 4.2, 2.5],
+                            borderColor: colors.accent,
+                            backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }
+                    ]
+                },
+                options: chartOpts
+            });
+
+            // Battery Chart
+            charts.battery = new Chart(document.getElementById('batteryChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    datasets: [{
+                        label: 'Battery Level (%)',
+                        data: [40, 35, 45, 75, 85, 70, 55],
+                        borderColor: colors.secondary,
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    ...chartOpts,
+                    scales: {
+                        ...chartOpts.scales,
+                        y: {
+                            ...chartOpts.scales.y,
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Sources Doughnut Chart
+            charts.sources = new Chart(document.getElementById('sourcesChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Solar', 'Battery', 'Grid'],
+                    datasets: [{
+                        data: [60, 30, 10],
+                        backgroundColor: [colors.primary, colors.secondary, '#ff4444'],
+                        borderColor: '#141829',
+                        borderWidth: 3,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#a8b2d1',
+                                font: { size: 14 },
+                                padding: 15
+                            },
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Efficiency Chart
+            charts.efficiency = new Chart(document.getElementById('efficiencyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'System Efficiency (%)',
+                        data: [88, 91, 89, 92],
+                        backgroundColor: [colors.primary, colors.secondary, colors.accent, colors.primary],
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    ...chartOpts,
+                    scales: {
+                        ...chartOpts.scales,
+                        y: {
+                            ...chartOpts.scales.y,
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Weekly Overview
+            charts.weekly = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                    datasets: [
+                        {
+                            label: 'Solar Production (kWh)',
+                            data: [38.2, 37.9, 40.5, 39.1, 41.3, 42.6, 40.4],
+                            backgroundColor: colors.primary,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Consumption (kWh)',
+                            data: [25.5, 26.8, 24.3, 27.9, 28.1, 26.4, 25.6],
+                            backgroundColor: colors.accent,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: chartOpts
+            });
+
+            // Hourly Production (Analytics)
+            new Chart(document.getElementById('hourlyProductionChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    datasets: [{
+                        label: 'Hourly Production (kW)',
+                        data: [0, 0, 0, 0, 0, 0.5, 1.8, 3.2, 4.5, 5.2, 5.8, 6.0, 5.9, 5.5, 4.8, 3.9, 2.8, 1.5, 0.4, 0, 0, 0, 0, 0],
+                        borderColor: colors.primary,
+                        backgroundColor: 'rgba(0, 217, 142, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: chartOpts
+            });
+
+            // Savings Chart
+            new Chart(document.getElementById('savingsChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Monthly Savings ($)',
+                        data: [72, 78, 85, 92, 87, 95],
+                        backgroundColor: colors.primary,
+                        borderRadius: 8
+                    }]
+                },
+                options: chartOpts
+            });
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.getElementById(btn.dataset.tab + '-tab').classList.remove('hidden');
+            });
+        });
+
+        // Update simulation
+        setInterval(() => {
+            // Simulate solar variation
+            const hour = new Date().getHours();
+            if (hour >= 6 && hour <= 18) {
+                solarPower = Math.random() * 2000 + 3000; // 3-5 kW during day
+            } else {
+                solarPower = Math.random() * 500; // Low at night
+            }
+
+            if (document.getElementById('auto-mode').style.display !== 'none') {
+                renderAutoMode();
+            } else if (document.getElementById('manual-mode').style.display !== 'none') {
+                renderManualMode();
+            }
+        }, 3000);
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initCharts();
+            renderAutoMode();
+            renderSystemDevices();
+            updateUI();
+            updateControlSummary();
+        });
+    </script>
+</body>
+</html>
